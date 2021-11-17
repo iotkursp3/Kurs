@@ -2,5 +2,8 @@ SETUP i BLINK
 https://randomnerdtutorials.com/installing-the-esp32-board-in-arduino-ide-windows-instructions/
 https://randomnerdtutorials.com/getting-started-with-esp32/
 
+FADE
+https://randomnerdtutorials.com/esp32-pwm-arduino-ide/
+
 DHT
 https://randomnerdtutorials.com/esp32-dht11-dht22-temperature-humidity-sensor-arduino-ide/
