@@ -5,7 +5,7 @@
 
 #include "DHT.h"
 
-const int DHTPIN = 4;     // Digital pin connected to the DHT sensor
+const int DHTPIN = 13;     // Digital pin connected to the DHT sensor
 
 // Uncomment whatever type you're using!
 #define DHTTYPE DHT11   // DHT 11
