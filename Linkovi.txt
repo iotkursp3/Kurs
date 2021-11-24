@@ -10,3 +10,4 @@ https://randomnerdtutorials.com/esp32-dht11-dht22-temperature-humidity-sensor-ar
 
 OLED
 https://randomnerdtutorials.com/esp32-ssd1306-oled-display-arduino-ide/
+https://sourceforge.net/projects/lcd-image-converter/files/
