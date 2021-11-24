@@ -30,19 +30,18 @@ void setup() {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;);
   }
-  dht.begin();
   delay(2000);
   display.clearDisplay();
 
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0, 10);
+  dht.begin();
 }
 
 void loop() {
   // Wait a few seconds between measurements.
   delay(2000);
-  display.setCursor(0, 10);
 
   // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
@@ -54,7 +53,7 @@ void loop() {
 
   // Check if any reads failed and exit early (to try again).
   if (isnan(h) || isnan(t) || isnan(f)) {
-    display.println("Failed to read from DHT sensor!");
+    Serial.println("Failed to read from DHT sensor!");
     return;
   }
 
@@ -63,13 +62,17 @@ void loop() {
   // Compute heat index in Celsius (isFahreheit = false)
   float hic = dht.computeHeatIndex(t, h, false);
 
+  display.clearDisplay();
+  display.setCursor(0, 10);
+
   display.print("Humidity: ");
   display.print(h);
   display.println("%");
   display.print("Temperature: ");
   display.print(t);
-  display.println("°C");
+  display.println("C");
   display.print("Heat index: ");
   display.print(hic);
-  display.print("°C");
+  display.print("C");
+  display.display(); 
 }
