@@ -11,3 +11,7 @@ https://randomnerdtutorials.com/esp32-dht11-dht22-temperature-humidity-sensor-ar
 OLED
 https://randomnerdtutorials.com/esp32-ssd1306-oled-display-arduino-ide/
 https://sourceforge.net/projects/lcd-image-converter/files/
+
+Servo
+https://randomnerdtutorials.com/esp32-servo-motor-web-server-arduino-ide/
+https://github.com/RoboticsBrno/ESP32-Arduino-Servo-Library/archive/master.zip
