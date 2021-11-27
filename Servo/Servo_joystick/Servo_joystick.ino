@@ -1,6 +1,7 @@
 // These constants won't change. They're used to give names to the pins used:
 const int xAxisPin = 25;
 const int yAxisPin = 26;
+static const int servoPin = 13;
 
 Servo servo1;
 
