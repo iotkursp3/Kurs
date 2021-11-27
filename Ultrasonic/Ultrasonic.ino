@@ -39,7 +39,7 @@ void loop() {
   distanceCm = duration * SOUND_SPEED/2;
   
   // Prints the distance in the Serial Monitor
-  Serial.print("Distance (cm): ");
+  Serial.print("Udaljenost (cm): ");
   Serial.println(distanceCm);
   
   delay(1000);
