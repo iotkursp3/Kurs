@@ -11,7 +11,14 @@ void setup() {
 }
 
 void loop() {
-    int servoPosition = map(analogRead(potentiometerPin), 0, 4096, 0, 180);
+    int pot_value = 0;        // value read from the pot
+    pot_value = analogRead(potentiometerPin);
+
+    // print the results to the Serial Monitor:
+    Serial.print("Pozicija potenciometra: ");
+    Serial.println(pot_value);
+    
+    int servoPosition = map(pot_value, 0, 4096, 0, 180);
     servo1.write(servoPosition);
     Serial.println(servoPosition);
     delay(20);
