@@ -1,6 +1,6 @@
 // These constants won't change. They're used to give names to the pins used:
-const int xAxisPin = 25;
-const int yAxisPin = 26;
+const int xAxisPin = 26;
+const int yAxisPin = 25;
 
 void setup() {
   pinMode(xAxisPin, INPUT);
