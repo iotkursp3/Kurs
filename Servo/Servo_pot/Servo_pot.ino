@@ -1,19 +1,18 @@
-// These constants won't change. They're used to give names to the pins used:
-const int analogInPin = 25;  // Analog input pin that the potentiometer is attached to
-const int analogOutPin = 9; // Analog output pin that the LED is attached to
+#include <Servo.h>
+
+static const int servoPin = 13;
+static const int potentiometerPin = 25;
+
+Servo servo1;
 
 void setup() {
-  Serial.begin(115200);
+    Serial.begin(115200);
+    servo1.attach(servoPin);
 }
 
 void loop() {
-  // read the analog in value:
-  int pot_value = 0;        // value read from the pot
-  pot_value = analogRead(analogInPin);
-
-  // print the results to the Serial Monitor:
-  Serial.print("Pozicija potenciometra: ");
-  Serial.println(pot_value);
-  
-  delay(2);
+    int servoPosition = map(analogRead(potentiometerPin), 0, 4096, 0, 180);
+    servo1.write(servoPosition);
+    Serial.println(servoPosition);
+    delay(20);
 }
