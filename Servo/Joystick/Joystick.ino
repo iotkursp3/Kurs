@@ -3,6 +3,8 @@ const int xAxisPin = 25;
 const int yAxisPin = 26;
 
 void setup() {
+  pinMode(xAxisPin, INPUT);
+  pinMode(yAxisPin, INPUT);
   Serial.begin(115200);
 }
 
