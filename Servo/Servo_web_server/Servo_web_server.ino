@@ -1,6 +1,6 @@
 /*********
   Rui Santos
-  Complete project details at http://randomnerdtutorials.com  
+  Complete project details at https://randomnerdtutorials.com  
 *********/
 
 #include <WiFi.h>
@@ -40,13 +40,19 @@ void setup() {
   myservo.attach(servoPin);  // attaches the servo on the servoPin to the servo object
 
   // Connect to Wi-Fi network with SSID and password
-  WiFi.softAP(ssid, password);
-  IPAddress myIP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(myIP);
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  // Print local IP address and start web server
+  Serial.println("");
+  Serial.println("WiFi connected.");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
   server.begin();
-
-  Serial.println("Server started");
 }
 
 void loop(){
