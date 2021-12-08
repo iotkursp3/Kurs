@@ -9,10 +9,7 @@
   copies or substantial portions of the Software.
 *********/
 
-#include <Wire.h>
-#include <SPI.h>
-#include <Adafruit_Sensor.h>
-#include "Adafruit_BME680.h"
+#include "DHT.h"
 #include <WiFi.h>
 #include "ESPAsyncWebServer.h"
 
@@ -20,20 +17,17 @@
 const char* ssid = "REPLACE_WITH_YOUR_SSID";
 const char* password = "REPLACE_WITH_YOUR_PASSWORD";
 
-//Uncomment if using SPI
-/*#define BME_SCK 18
-#define BME_MISO 19
-#define BME_MOSI 23
-#define BME_CS 5*/
+const int DHTPIN = 13;     // Digital pin connected to the DHT sensor
 
-Adafruit_BME680 bme; // I2C
-//Adafruit_BME680 bme(BME_CS); // hardware SPI
-//Adafruit_BME680 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK);
+// Uncomment whatever type you're using!
+#define DHTTYPE DHT11   // DHT 11
+// #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
+// #define DHTTYPE DHT21   // DHT 21 (AM2301)
+
+DHT dht(DHTPIN, DHTTYPE);
 
 float temperature;
 float humidity;
-float pressure;
-float gasResistance;
 
 AsyncWebServer server(80);
 AsyncEventSource events("/events");
@@ -41,25 +35,14 @@ AsyncEventSource events("/events");
 unsigned long lastTime = 0;  
 unsigned long timerDelay = 30000;  // send readings timer
 
-void getBME680Readings(){
-  // Tell BME680 to begin measurement.
-  unsigned long endTime = bme.beginReading();
-  if (endTime == 0) {
-    Serial.println(F("Failed to begin reading :("));
-    return;
-  }
-  if (!bme.endReading()) {
-    Serial.println(F("Failed to complete reading :("));
-    return;
-  }
-  temperature = bme.temperature;
-  pressure = bme.pressure / 100.0;
-  humidity = bme.humidity;
-  gasResistance = bme.gas_resistance / 1000.0;
+void getDHT11Readings(){
+  //Mjeri podatke sa DHT11 senzora
+  temperature = dht.readTemperature();
+  humidity = dht.readHumidity();
 }
 
 String processor(const String& var){
-  getBME680Readings();
+  getDHT11Readings();
   //Serial.println(var);
   if(var == "TEMPERATURE"){
     return String(temperature);
@@ -67,18 +50,12 @@ String processor(const String& var){
   else if(var == "HUMIDITY"){
     return String(humidity);
   }
-  else if(var == "PRESSURE"){
-    return String(pressure);
-  }
- else if(var == "GAS"){
-    return String(gasResistance);
-  }
 }
 
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
 <head>
-  <title>BME680 Web Server</title>
+  <title>DHT11 Web Server</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
   <link rel="icon" href="data:,">
@@ -99,7 +76,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 </head>
 <body>
   <div class="topnav">
-    <h3>BME680 WEB SERVER</h3>
+    <h3>DHT11 WEB SERVER</h3>
   </div>
   <div class="content">
     <div class="cards">
@@ -108,12 +85,6 @@ const char index_html[] PROGMEM = R"rawliteral(
       </div>
       <div class="card humidity">
         <h4><i class="fas fa-tint"></i> HUMIDITY</h4><p><span class="reading"><span id="hum">%HUMIDITY%</span> &percnt;</span></p>
-      </div>
-      <div class="card pressure">
-        <h4><i class="fas fa-angle-double-down"></i> PRESSURE</h4><p><span class="reading"><span id="pres">%PRESSURE%</span> hPa</span></p>
-      </div>
-      <div class="card gas">
-        <h4><i class="fas fa-wind"></i> GAS</h4><p><span class="reading"><span id="gas">%GAS%</span> K&ohm;</span></p>
       </div>
     </div>
   </div>
@@ -143,16 +114,6 @@ if (!!window.EventSource) {
   console.log("humidity", e.data);
   document.getElementById("hum").innerHTML = e.data;
  }, false);
- 
- source.addEventListener('pressure', function(e) {
-  console.log("pressure", e.data);
-  document.getElementById("pres").innerHTML = e.data;
- }, false);
- 
- source.addEventListener('gas', function(e) {
-  console.log("gas", e.data);
-  document.getElementById("gas").innerHTML = e.data;
- }, false);
 }
 </script>
 </body>
@@ -160,6 +121,8 @@ if (!!window.EventSource) {
 
 void setup() {
   Serial.begin(115200);
+
+  dht.begin();
 
   // Set the device as a Station and Soft Access Point simultaneously
   WiFi.mode(WIFI_AP_STA);
@@ -173,18 +136,6 @@ void setup() {
   Serial.print("Station IP Address: ");
   Serial.println(WiFi.localIP());
   Serial.println();
-
-  // Init BME680 sensor
-  if (!bme.begin()) {
-    Serial.println(F("Could not find a valid BME680 sensor, check wiring!"));
-    while (1);
-  }
-  // Set up oversampling and filter initialization
-  bme.setTemperatureOversampling(BME680_OS_8X);
-  bme.setHumidityOversampling(BME680_OS_2X);
-  bme.setPressureOversampling(BME680_OS_4X);
-  bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
-  bme.setGasHeater(320, 150); // 320*C for 150 ms
 
   // Handle Web Server
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -206,19 +157,15 @@ void setup() {
 
 void loop() {
   if ((millis() - lastTime) > timerDelay) {
-    getBME680Readings();
+    getDHT11Readings();
     Serial.printf("Temperature = %.2f ºC \n", temperature);
     Serial.printf("Humidity = %.2f % \n", humidity);
-    Serial.printf("Pressure = %.2f hPa \n", pressure);
-    Serial.printf("Gas Resistance = %.2f KOhm \n", gasResistance);
     Serial.println();
 
     // Send Events to the Web Server with the Sensor Readings
     events.send("ping",NULL,millis());
     events.send(String(temperature).c_str(),"temperature",millis());
     events.send(String(humidity).c_str(),"humidity",millis());
-    events.send(String(pressure).c_str(),"pressure",millis());
-    events.send(String(gasResistance).c_str(),"gas",millis());
     
     lastTime = millis();
   }
