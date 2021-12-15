@@ -15,3 +15,6 @@ https://sourceforge.net/projects/lcd-image-converter/files/
 Servo
 https://randomnerdtutorials.com/esp32-servo-motor-web-server-arduino-ide/
 https://github.com/RoboticsBrno/ESP32-Arduino-Servo-Library/archive/master.zip
+
+MQTT
+https://github.com/knolleary/pubsubclient
