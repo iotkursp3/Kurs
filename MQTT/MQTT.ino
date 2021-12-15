@@ -1,3 +1,8 @@
+/*
+Adafruit mqtt servis: https://io.adafruit.com/
+Biblioteka: https://github.com/knolleary/pubsubclient
+
+
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <Wire.h>
