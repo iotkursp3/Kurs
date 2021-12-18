@@ -1,12 +1,19 @@
 #include <esp_now.h>
 #include <WiFi.h>
 
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
-
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
+#include "DHT.h"
+
+const int DHTPIN = 13;     // Digital pin connected to the DHT sensor
+
+// Uncomment whatever type you're using!
+#define DHTTYPE DHT11   // DHT 11
+// #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
+// #define DHTTYPE DHT21   // DHT 21 (AM2301)
+
+DHT dht(DHTPIN, DHTTYPE);
 
 #define SCREEN_WIDTH 128  // OLED display width, in pixels
 #define SCREEN_HEIGHT 64  // OLED display height, in pixels
@@ -14,20 +21,16 @@
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-Adafruit_BME280 bme;
-
 // REPLACE WITH THE MAC Address of your receiver 
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-// Define variables to store BME280 readings to be sent
+// Define variables to store DHT11 readings to be sent
 float temperature;
 float humidity;
-float pressure;
 
 // Define variables to store incoming readings
 float incomingTemp;
 float incomingHum;
-float incomingPres;
 
 // Variable to store if sending data was successful
 String success;
@@ -37,11 +40,10 @@ String success;
 typedef struct struct_message {
     float temp;
     float hum;
-    float pres;
 } struct_message;
 
-// Create a struct_message called BME280Readings to hold sensor readings
-struct_message BME280Readings;
+// Create a struct_message called DHT11Readings to hold sensor readings
+struct_message DHT11Readings;
 
 // Create a struct_message to hold incoming sensor readings
 struct_message incomingReadings;
@@ -65,20 +67,14 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   Serial.println(len);
   incomingTemp = incomingReadings.temp;
   incomingHum = incomingReadings.hum;
-  incomingPres = incomingReadings.pres;
 }
  
 void setup() {
   // Init Serial Monitor
   Serial.begin(115200);
-
-  // Init BME280 sensor
-  bool status = bme.begin(0x76);  
-  if (!status) {
-    Serial.println("Could not find a valid BME280 sensor, check wiring!");
-    while (1);
-  }
-
+  
+  dht.begin();
+  
   // Init OLED display
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
     Serial.println(F("SSD1306 allocation failed"));
@@ -117,12 +113,11 @@ void loop() {
   getReadings();
  
   // Set values to send
-  BME280Readings.temp = temperature;
-  BME280Readings.hum = humidity;
-  BME280Readings.pres = pressure;
+  DHT11Readings.temp = temperature;
+  DHT11Readings.hum = humidity;
 
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &BME280Readings, sizeof(BME280Readings));
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &DHT11Readings, sizeof(DHT11Readings));
    
   if (result == ESP_OK) {
     Serial.println("Sent with success");
@@ -133,10 +128,10 @@ void loop() {
   updateDisplay();
   delay(10000);
 }
+
 void getReadings(){
-  temperature = bme.readTemperature();
-  humidity = bme.readHumidity();
-  pressure = (bme.readPressure() / 100.0F);
+  temperature = dht.readTemperature();
+  humidity = dht.readHumidity();
 }
 
 void updateDisplay(){
@@ -157,10 +152,6 @@ void updateDisplay(){
   display.print(incomingHum);
   display.print("%");
   display.setCursor(0, 35);
-  display.print("Pressure: ");
-  display.print(incomingPres);
-  display.print("hPa");
-  display.setCursor(0, 56);
   display.print(success);
   display.display();
   
@@ -172,8 +163,5 @@ void updateDisplay(){
   Serial.print("Humidity: ");
   Serial.print(incomingReadings.hum);
   Serial.println(" %");
-  Serial.print("Pressure: ");
-  Serial.print(incomingReadings.pres);
-  Serial.println(" hPa");
   Serial.println();
 }
