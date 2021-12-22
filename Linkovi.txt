@@ -19,3 +19,6 @@ https://github.com/RoboticsBrno/ESP32-Arduino-Servo-Library/archive/master.zip
 MQTT
 https://github.com/knolleary/pubsubclient
 https://io.adafruit.com/
+
+IFTTT
+https://ifttt.com/
