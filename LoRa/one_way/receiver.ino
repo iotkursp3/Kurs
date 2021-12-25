@@ -1,5 +1,5 @@
 #include "LoRa.h"
-#include "ArduinoJson.h"
+#include <SPI.h>
 
 #define SCK 18
 #define MISO 19
